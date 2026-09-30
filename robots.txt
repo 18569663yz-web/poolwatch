@@ -1,0 +1,12 @@
+# Unclaimed Uniswap V3 fees — a read-only lookup page: no server, no accounts,
+# no cookies, no logging. There is nothing here worth hiding from a crawler.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://poolwatch.dess.lol/sitemap.xml
+
+# Known limitation: this file cannot de-index the deployment's own
+# *.pages.dev host, because robots.txt is per-host and _headers matches paths,
+# not hostnames. If that ever matters, it is an account-level job (Cloudflare
+# Access over the preview host, or Bulk Redirects). See DEPLOY.md.

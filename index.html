@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 与 v3fees/_headers:15 逐字一致，且刻意不含 frame-ancestors（meta 形式会被浏览器忽略）。
+     这份 meta 是 IPFS 部署下的唯一 CSP —— 那里没有 HTTP 响应头。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ethereum-rpc.publicnode.com https://virginia.rpc.blxrbdn.com https://eth.rpc.blxrbdn.com https://coins.llama.fi; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+<meta http-equiv="refresh" content="0; url=./site/">
+<title>Unclaimed Uniswap V3 fees</title>
+<meta name="description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server. We don't log or store the addresses you check.">
+<!-- 这个文件只是跳转桩（下面第 20 行的 meta refresh），但分享卡必须在这里也写一份：
+     大量爬虫（X / Telegram / WhatsApp）**不跟随 meta refresh**，只读它抓到的那个
+     HTML。少了这一段，分享 https://poolwatch.dess.lol/ 出来就是一个光秃秃的链接。
+     canonical/og:url 都指向真正的页面 /site/，与 v3fees/site/index.html 完全一致 ——
+     地址要改就两处一起改，static-checks.mjs 第 7 项会盯着。 -->
+<link rel="canonical" href="https://poolwatch.dess.lol/site/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:title" content="Are your LP fees still sitting in the pool?">
+<meta property="og:description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server. We don't log or store the addresses you check.">
+<meta property="og:url" content="https://poolwatch.dess.lol/site/">
+<meta property="og:image" content="https://poolwatch.dess.lol/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Are your LP fees still sitting in the pool?">
+<meta name="twitter:description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server.">
+<meta name="twitter:image" content="https://poolwatch.dess.lol/og.png">
+<link rel="stylesheet" href="landing.css">
+</head>
+<body>
+<p><a href="./site/">Unclaimed Uniswap V3 fees →</a></p>
+</body>
+</html>

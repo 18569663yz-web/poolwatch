@@ -1,0 +1,350 @@
+/* v3fees/site/style.css
+   Owner: frontend-dev.
+   Deliberately boring: one accent colour, hairline rules, no gradients, no
+   rounded card stacks, nothing that fades in. Everything is left-aligned.
+   Type: serif for headings, the system UI stack for prose, monospace for
+   anything a reader might want to copy out and verify. */
+
+:root {
+  --bg: #0C0A09;
+  --surface: #151312;
+  --text: #F5F3F0;
+  --muted: #8A8580;
+  --dim: #5F5A56;
+  --accent: #E8A33D;
+  --accent-hi: #F2B45C;
+  --rule: rgba(255, 255, 255, 0.08);
+  --serif: ui-serif, Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --maxw: 760px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.62 var(--sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #0C0A09; }
+
+a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--rule); }
+a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skiplink {
+  position: absolute; left: -9999px; top: 0; z-index: 20;
+  background: var(--accent); color: #0C0A09; padding: 8px 14px; font-size: 13px;
+}
+.skiplink:focus { left: 8px; top: 8px; border: 0; }
+.copybuf { position: fixed; left: -9999px; top: 0; width: 10px; opacity: 0; }
+
+/* ---------------------------------------------------------------- tip bar */
+
+.tipbar { border-bottom: 1px solid var(--rule); background: var(--surface); }
+.tipbar__inner {
+  max-width: var(--maxw); margin: 0 auto; padding: 7px 24px;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+  font-size: 11.5px; line-height: 1.5;
+}
+.tipbar__label {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--accent);
+}
+.tipbar__addr { color: var(--text); font-size: 11.5px; word-break: break-all; }
+.tipbar__note { color: var(--muted); }
+/* The anti-phishing sentence gets its own line at the top of the page, where a
+   suspicious visitor is already looking for the tip address. */
+.tipbar__never { flex-basis: 100%; color: #A8A29C; }
+
+/* ----------------------------------------------------------------- topbar */
+
+.topbar {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--rule);
+}
+.topbar__inner {
+  max-width: var(--maxw); margin: 0 auto; padding: 13px 24px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+}
+.nav, .footnav { font-size: 12.5px; letter-spacing: .01em; }
+.nav a, .footnav a { color: var(--muted); border-bottom: 0; }
+.nav a:hover, .footnav a:hover { color: var(--accent); }
+.nav__sep { color: var(--dim); padding: 0 7px; }
+
+.lang { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; white-space: nowrap; }
+.lang__btn {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; color: var(--dim); letter-spacing: inherit;
+}
+.lang__btn:hover { color: var(--text); }
+.lang__btn[aria-pressed="true"] { color: var(--accent); }
+.lang__sep { color: var(--dim); padding: 0 3px; }
+
+/* ------------------------------------------------------------------- page */
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 40px 24px 72px; }
+
+.eyebrow {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+}
+
+.h1 {
+  font-family: var(--serif); font-weight: 400;
+  font-size: clamp(1.8rem, 5.2vw, 2.55rem); line-height: 1.13;
+  letter-spacing: -.015em; margin: .38em 0 .5em; max-width: 26ch;
+}
+
+.lede { color: var(--muted); font-size: 1.0625rem; line-height: 1.58; max-width: 58ch; margin: 0; }
+
+h2, h3 { font-weight: 400; }
+
+/* ------------------------------------------- the network-wide headline stat
+   A static measurement, not the visitor's balance. It never gets a box, a
+   background or a border: only the page's usual hairline above it. The number
+   is amber and deliberately smaller than `.res__total` (which is white and
+   larger), so the moment a visitor runs their own lookup their own figure is
+   the biggest thing on the page and this one reads as context. */
+
+.stat {
+  margin: 30px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  max-width: 62ch;
+}
+.stat__label { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.stat__value {
+  margin: 5px 0 0;
+  font-size: clamp(1.35rem, 4.6vw, 1.7rem);
+  line-height: 1.15; letter-spacing: -.01em;
+  color: var(--accent);
+}
+/* The distinction the visitor must not miss. Same colour as `.tipbar__never`,
+   the other line on this page that exists to stop someone being misled. */
+.stat__scope { margin: 7px 0 0; color: #A8A29C; font-size: 12.5px; line-height: 1.5; }
+.stat__note { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.stat__note a { border-bottom-color: var(--dim); }
+
+/* -------------------------------------------------------------- the input */
+
+.checkrow { display: flex; gap: 8px; margin: 30px 0 12px; max-width: 660px; }
+.checkrow__input {
+  flex: 1 1 auto; min-width: 0;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--rule); border-radius: 2px;
+  padding: 11px 12px; font: 14px/1.45 var(--mono);
+}
+.checkrow__input::placeholder { color: var(--dim); }
+.checkrow__input:focus { outline: none; border-color: var(--accent); }
+
+.btn {
+  background: var(--accent); color: #0C0A09;
+  border: 1px solid var(--accent); border-radius: 2px;
+  padding: 11px 20px; font: 600 13.5px/1.45 var(--sans);
+  letter-spacing: .02em; cursor: pointer; white-space: nowrap;
+}
+.btn:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
+.btn:disabled { opacity: .45; cursor: default; background: var(--accent); }
+.btn--ghost { background: transparent; color: var(--text); border-color: var(--rule); }
+.btn--ghost:hover { background: var(--surface); border-color: var(--muted); color: var(--text); }
+
+.fine { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin: 3px 0; max-width: 62ch; }
+.fine--brighter { color: #A8A29C; }
+
+.copy {
+  background: none; border: 0; padding: 0 0 0 7px; cursor: pointer;
+  font: 10px/1 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--dim); vertical-align: baseline;
+}
+.copy:hover { color: var(--accent); }
+.copy[data-done] { color: var(--accent); }
+
+/* ----------------------------------------------------------------- states */
+
+.state { display: none; }
+body[data-state="loading"] .state--loading,
+body[data-state="error"] .state--error,
+body[data-state="empty"] .state--empty { display: block; }
+
+body[data-state="loading"] #check,
+body[data-state="loading"] #addr { opacity: .5; pointer-events: none; }
+
+body[data-state="idle"] .result,
+body[data-state="loading"] .result,
+body[data-state="error"] .result,
+body[data-state="empty"] .result { display: none; }
+
+.state { margin: 30px 0 0; padding-top: 20px; border-top: 1px solid var(--rule); }
+.state__head { font-family: var(--serif); font-size: 1.15rem; line-height: 1.4; margin: 0 0 .4em; max-width: 56ch; }
+.state__line { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin: 0 0 12px; }
+.state__body { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin: 0 0 1em; max-width: 62ch; }
+.state--error .state__head { color: var(--accent); }
+
+.meter { height: 2px; background: var(--rule); overflow: hidden; max-width: 660px; }
+.meter__bar { display: block; height: 2px; width: 34%; background: var(--accent); animation: sweep 1.15s ease-in-out infinite; }
+@keyframes sweep { 0% { transform: translateX(-102%); } 100% { transform: translateX(300%); } }
+
+/* Once the adapter reports done/total the meter stops being decorative and
+   becomes an actual count. A wallet with thousands of positions needs it. */
+.meter[data-det] .meter__bar { animation: none; width: var(--p, 0%); transition: width .25s linear; }
+@media (prefers-reduced-motion: reduce) {
+  .meter__bar { animation: none; width: 100%; }
+  .meter[data-det] .meter__bar { width: var(--p, 0%); transition: none; }
+}
+
+/* --------------------------------------------------------------- results */
+
+.result { margin: 38px 0 0; }
+.res__head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 6px 20px; padding-top: 20px; border-top: 1px solid var(--rule);
+}
+.res__count { font-family: var(--serif); font-size: 1.15rem; line-height: 1.4; margin: 0; }
+.dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); margin-right: 9px; vertical-align: 1px; }
+.res__totalwrap { text-align: right; margin-left: auto; }
+.res__totallabel {
+  display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
+}
+.res__total {
+  display: block; font-family: var(--mono); font-size: clamp(1.5rem, 5vw, 2.05rem);
+  line-height: 1.1; letter-spacing: -.02em;
+}
+
+.res__addr { font-size: 12px; color: var(--muted); margin: 14px 0 0; word-break: break-all; }
+.res__addr a { color: var(--muted); }
+.res__addr a:hover { color: var(--accent); }
+
+.tw { overflow-x: auto; margin-top: 22px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th {
+  font: 500 10.5px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .11em;
+  color: var(--muted); text-align: left; padding: 0 14px 9px 0; border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.tbl td { padding: 13px 14px 13px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl__more td { padding: 14px 0 0; border-bottom: 0; }
+.linkbtn {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: 11px/1.4 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent);
+}
+.linkbtn:hover { color: var(--accent-hi); border-bottom: 1px solid var(--accent-hi); }
+.linkbtn:disabled { opacity: .6; cursor: default; }
+.tbl .num { text-align: right; padding-right: 0; white-space: nowrap; }
+.tbl .c-pos { width: 8.5rem; }
+/* Tokens with no symbol() on chain come back as `0x1234…abcd`. Two of those in
+   one cell must wrap rather than push the numbers off the page. */
+.tbl .c-pool { width: auto; max-width: 22rem; overflow-wrap: anywhere; }
+
+.poslink { border-bottom: 0; }
+.poslink:hover { border-bottom: 0; }
+.poolname { color: var(--text); }
+.feetier { color: var(--muted); font-family: var(--mono); font-size: 11.5px; padding-left: 5px; }
+.range {
+  display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--dim); padding-left: 6px;
+}
+.amt { display: block; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.usd { display: block; color: var(--muted); font-family: var(--mono); font-size: 12.5px; }
+.note-inline { color: var(--muted); font-size: 13px; margin: 14px 0 0; max-width: 62ch; }
+/* A caveat about the headline number itself is not decoration: brighten it. */
+.note-inline--flag { color: var(--text); }
+.skipped__ids { color: var(--dim); font-size: 11.5px; overflow-wrap: anywhere; }
+.skipped__why { color: var(--text); font-size: 11.5px; }
+
+.locked { margin-top: 40px; }
+.locked__head {
+  font-family: var(--serif); font-size: 1.05rem; margin: 0 0 .35em; color: var(--text);
+}
+.locked .tbl td { color: var(--muted); }
+.tag-dead {
+  display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--accent); border: 1px solid var(--rule);
+  padding: 1px 5px; margin-left: 7px;
+}
+
+.cta { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.cta__note { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 52ch; }
+
+.res__meta { margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.res__meta p { color: var(--muted); font-size: 12.5px; margin: 0; }
+
+/* --------------------------------------------------------------- sections */
+
+.rule { border: 0; border-top: 1px solid var(--rule); margin: 58px 0; }
+.sec { scroll-margin-top: 64px; }
+.h2 { font-family: var(--serif); font-size: 1.4rem; line-height: 1.3; letter-spacing: -.01em; margin: 0 0 .7em; }
+.sec p { margin: 0 0 .95em; max-width: 64ch; color: #CFC9C3; }
+.sec .note {
+  color: var(--muted); font-size: 13.5px; line-height: 1.62;
+  border-left: 1px solid var(--rule); padding-left: 14px; max-width: 60ch;
+}
+
+.steps { padding-left: 1.35em; margin: .2em 0 1.1em; max-width: 64ch; color: #CFC9C3; }
+.steps li { margin: .4em 0; padding-left: .15em; }
+.steps li::marker { color: var(--muted); font-family: var(--mono); font-size: .85em; }
+
+/* Rendered blocks for the Method section — see rich.js. */
+.h3 { font-size: .95rem; letter-spacing: .01em; margin: 1.9em 0 .6em; color: var(--text); }
+#methodbody > .h3:first-of-type { margin-top: 1.2em; }
+.rich-list {
+  color: #CFC9C3; font-size: 14.5px; line-height: 1.62;
+  padding-left: 1.25em; margin: 0 0 1.1em; max-width: 64ch;
+}
+.rich-list li { margin: .45em 0; }
+.rich-list li::marker { color: var(--muted); }
+.rich--limits .rich-list { color: var(--muted); font-size: 13.5px; }
+.rich--limits .rich-list li::marker { color: var(--dim); }
+.rich code {
+  font-family: var(--mono); font-size: .88em; color: var(--text);
+  background: var(--surface); border: 1px solid var(--rule); padding: 0 4px;
+  overflow-wrap: anywhere;   /* the 42-char position-manager address has no break point */
+}
+.rich strong { color: var(--text); font-weight: 600; }
+.rich .code {
+  font: 12.5px/1.65 var(--mono); color: #CFC9C3; background: var(--surface);
+  border: 1px solid var(--rule); border-left: 2px solid var(--accent);
+  padding: 12px 14px; margin: 0 0 1.1em; max-width: 100%;
+  overflow-x: auto; white-space: pre;
+}
+
+/* ---------------------------------------------------------------- footer */
+
+.footnav { margin: 0 0 22px; }
+.foot { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.foot p { color: var(--muted); font-size: 12.5px; margin: 0 0 5px; max-width: 66ch; }
+.foot__meta { color: var(--dim) !important; }
+
+/* ----------------------------------------------------------------- small */
+
+@media (max-width: 640px) {
+  .wrap { padding: 30px 16px 56px; }
+  .tipbar__inner, .topbar__inner { padding-left: 16px; padding-right: 16px; }
+  .topbar__inner { flex-wrap: wrap; gap: 8px; }
+  .checkrow { gap: 6px; }
+  .btn { padding: 11px 15px; }
+  .tbl { font-size: 13px; }
+  .tbl td, .tbl th { padding-right: 10px; }
+  .tbl .c-pos { width: 6.5rem; }
+  .res__head { flex-direction: column; align-items: flex-start; }
+  .res__totalwrap { text-align: left; margin-left: 0; }
+  .rich .code { font-size: 11.5px; }
+  .rule { margin: 44px 0; }
+}

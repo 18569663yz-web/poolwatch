@@ -1,0 +1,42 @@
+/* v3fees/landing.css
+ *
+ * 只给根目录那张跳转页用。`v3fees/index.html` 会在 0 秒后转到 `./site/`，
+ * 所以这份样式唯一的职责是：万一跳转被拦下（无 JS 环境、爬虫、扩展干扰），
+ * 访问者看到的也不是一个深色背景上的默认蓝色链接。
+ *
+ * 颜色与 site/style.css 同一套：
+ *   底色 #0C0A09（偏暖近黑）／正文 #F5F3F0／主色琥珀 #E8A33D
+ *
+ * 注意：这份文件是按 `style-src 'self'` 写的 —— index.html 的 CSP 不允许内联样式，
+ * 所以样式必须待在这个独立文件里，不能塞回 <style> 标签。
+ */
+
+:root { color-scheme: dark; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0C0A09;
+  color: #F5F3F0;
+  font: 400 16px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+p { margin: 0; }
+
+a {
+  color: #E8A33D;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 163, 61, 0.35);
+  padding-bottom: 1px;
+}
+
+a:hover { border-bottom-color: #E8A33D; }
+
+a:focus-visible {
+  outline: 2px solid #E8A33D;
+  outline-offset: 3px;
+}

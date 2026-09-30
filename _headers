@@ -1,0 +1,93 @@
+# v3fees/_headers —— Cloudflare Pages / Netlify 格式
+#
+# 部署根目录是 v3fees/dist/（由 tools/publish.mjs 生成），不是 v3fees/ 本身 ——
+# 后者含 33.8 MB 的分析数据。本文件里所有规则路径都是从**站点根**开始的绝对路径
+# （/site/*.js、/kernel/*.mjs），所以 dist/ 的顶层层级必须与源目录一致；它确实一致，
+# 因为 publish.mjs 就是照引用图原样复制的。
+#
+# 依据：developers.cloudflare.com/pages/configuration/headers/ ——「Headers defined in
+# the `_headers` file override what Cloudflare ordinarily sends.」另有两条硬限制：
+# 最多 100 条规则、每行不超过 2000 字符（本文件 14 条规则，最长一行 314 字符）。
+#
+# 这里有两条独立的价值：
+#   1. 缓存规则 —— HTML 不缓存，否则用户会看到旧版本（Edge 对 ES module 的启发式缓存
+#      已经害我们在测试里读到过一次旧的 config.js）。
+#   2. CSP —— 这不只是安全措施，它是**可验证的信任声明**：
+#      它从浏览器层面证明「我们这个页面没有能力把你的地址发到任何第三方」。
+#      任何人打开 DevTools → Network 都能看到我们只访问了下面 connect-src 里列的那几个域。
+#      一个凭「我们不记录你的地址」取信的工具，就应该让这句话变成浏览器强制执行的规则，
+#      而不是一句写在页面上的承诺。
+
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ethereum-rpc.publicnode.com https://virginia.rpc.blxrbdn.com https://eth.rpc.blxrbdn.com https://coins.llama.fi; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+
+# HTML 与入口路径永远重新验证 —— 用户刷新必须拿到新页面。
+# 覆盖面要注意：`/` 只匹配根路径本身，`/site/`、`/index.html`、`/site` 各自都不命中它。
+# 漏一条就等于退回默认缓存，而 Edge 启发式缓存 ES module 这件事我们已经踩过一次。
+/
+  Cache-Control: no-cache, must-revalidate
+
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+/site
+  Cache-Control: no-cache, must-revalidate
+
+/site/
+  Cache-Control: no-cache, must-revalidate
+
+/site/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# JS/CSS 短缓存。这个站没有构建步骤，也没有内容指纹，
+# 所以不能长缓存 —— 否则改了代码用户半年看不到。
+# 如果上 IPFS，这段就没有意义了：CID 变了 URL 就变了，缓存由内容寻址解决。
+/site/*.js
+  Cache-Control: public, max-age=300
+
+/site/*.css
+  Cache-Control: public, max-age=300
+
+# 这两个很容易漏：它们不在 /site/ 下，但都是查询链路上的运行时文件
+# （landing.css 是落地页样式，data-adapter.js 是查询入口）。
+/data-adapter.js
+  Cache-Control: public, max-age=300
+
+/landing.css
+  Cache-Control: public, max-age=300
+
+# 分享卡的三个附件。它们和 /* 的默认规则没有冲突，但显式写出来是为了让
+# 「哪些东西会被 CDN 缓存、缓存多久」全都能在这一份文件里读完，不必去猜宿主默认。
+# robots.txt / sitemap.xml 用 300 秒而不是长缓存：将来改了规则，五分钟内全网生效。
+/og.png
+  Cache-Control: public, max-age=300
+
+/robots.txt
+  Cache-Control: public, max-age=300
+
+/sitemap.xml
+  Cache-Control: public, max-age=300
+
+# .mjs 的 MIME 是本项目唯一一个「只在生产才挂」的风险点，所以显式钉死。
+#
+# 浏览器对 ES module 做**严格 MIME 检查**：如果宿主把 .mjs 发成
+# application/octet-stream，加载会**直接失败**——不是样式错乱、不是降级，
+# 是整个应用一动不动，而且本地测试永远复现不出来（本地服务器按扩展名表发对了）。
+#
+# Cloudflare 官方文档（developers.cloudflare.com/pages/configuration/headers/）
+# 逐字写着：「Headers defined in the `_headers` file override what Cloudflare
+# ordinarily sends.」所以这里显式声明是有效的，不必去赌宿主默认的 mime 表。
+#
+# 注意这只覆盖 Cloudflare / Netlify 这类有 HTTP 头的宿主。IPFS 网关没有任何
+# 自定义头能力，那条路要靠网关自己的 mime 表 —— 上线前检查项见 DEPLOY.md。
+#
+# 两条头写在**同一个规则块**里。拆成两个 `/kernel/*.mjs` 块也能工作（不同的头会被
+# 合并），但同一个头名出现在两个块里会被**逗号连接**成非法值 —— 把规则块合并掉，
+# 以后往这里加头时就不会踩。
+/kernel/*.mjs
+  Cache-Control: public, max-age=300
+  Content-Type: text/javascript; charset=utf-8

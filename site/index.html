@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- The CSP is also delivered here, as a <meta>, not only as an HTTP header.
+     This is the one control that turns "we don't send your address anywhere"
+     from a promise into a rule the browser enforces, so it has to travel with
+     the files: on IPFS (or any static host that can't set headers) v3fees/_headers
+     does not exist. Deployments that can set headers should keep using it —
+     they agree, and the header copy is the stricter one.
+     Known difference: frame-ancestors is not supported in <meta> and is omitted
+     below (browsers ignore it when delivered this way). Clickjacking is a low
+     risk for a read-only lookup page; X-Frame-Options covers it where headers work. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ethereum-rpc.publicnode.com https://virginia.rpc.blxrbdn.com https://eth.rpc.blxrbdn.com https://coins.llama.fi; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unclaimed Uniswap V3 fees</title>
+<meta name="description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server. We don't log or store the addresses you check.">
+<!-- 分享卡。三个刻意的选择：
+     · canonical 指向 /site/ 而不是 / —— 根目录那个 index.html 是 meta-refresh
+       跳转桩，把 canonical 指向一个会跳转的地址是 Google 明确不建议的。
+     · URL 全部写绝对地址。爬虫不会去解析相对路径，而 Edge/Chrome 的预览调试器
+       也不解析，写完当时看不出问题，只有真正分享出去才发现卡片是空的。
+     · og:image 指向站点根下的 /og.png，它不在引用图里（由 tools/test/ogimage.mjs
+       从生产页面截的 1200x630），所以 publish.json 单独列着它。
+     ⚠ 换域名时这三处要一起改：v3fees/index.html、本文件、v3fees/sitemap.xml。
+     static-checks.mjs 第 7 项会断言它们的主机名一致，改漏一个就红。 -->
+<link rel="canonical" href="https://poolwatch.dess.lol/site/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:title" content="Are your LP fees still sitting in the pool?">
+<meta property="og:description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server. We don't log or store the addresses you check.">
+<meta property="og:url" content="https://poolwatch.dess.lol/site/">
+<meta property="og:image" content="https://poolwatch.dess.lol/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Are your LP fees still sitting in the pool?">
+<meta name="twitter:description" content="Enter any Ethereum address and see the Uniswap V3 LP fees it never collected. Read-only: no wallet connection, no signatures, no server.">
+<meta name="twitter:image" content="https://poolwatch.dess.lol/og.png">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230C0A09'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23E8A33D'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body data-state="idle">
+
+<a class="skiplink" href="#fees">Skip to the lookup form</a>
+
+<!-- Tipping address lives at the top of the page on purpose: it is the first
+     thing a suspicious visitor checks, and hiding it at the bottom looks worse. -->
+<div class="tipbar">
+  <div class="tipbar__inner">
+    <span class="tipbar__label" data-i18n="tip.label">Tip (optional)</span>
+    <span class="tipbar__addr mono" id="tipaddr" hidden></span>
+    <span class="tipbar__note" id="tipnote" data-i18n="tip.note">The tool is free and takes no cut. Address to be published.</span>
+    <span class="tipbar__never" data-i18n="tip.never">This tool will never DM you, never ask for a seed phrase, and never send you a claim link.</span>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <nav class="nav" aria-label="Primary">
+      <a href="#fees" data-scroll="fees" data-i18n="nav.fees">Fees</a>
+      <span class="nav__sep" aria-hidden="true">·</span>
+      <a href="#method" data-scroll="method" data-i18n="nav.method">Method</a>
+      <span class="nav__sep" data-navsrc aria-hidden="true">·</span>
+      <a id="navsrc" data-navsrc target="_blank" rel="noopener noreferrer" data-i18n="nav.github" hidden>GitHub</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" class="lang__btn" data-lang="en" lang="en">EN</button>
+      <span class="lang__sep" aria-hidden="true">/</span>
+      <button type="button" class="lang__btn" data-lang="zh" lang="zh-Hans">中文</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="fees">
+
+  <p class="eyebrow" data-i18n="eyebrow">Unclaimed Uniswap V3 fees</p>
+  <h1 class="h1" data-i18n="h1">Are your LP fees still sitting in the pool?</h1>
+  <p class="lede" data-i18n="lede">Half-finished withdrawals, positions abandoned after going out of range, NFTs sold before collecting — the fees never left.</p>
+
+  <!-- The network-wide total. It is a static historical measurement, NOT the
+       visitor's money, and the whole block is built to keep those two apart:
+       it is amber and smaller than the visitor's own result (which stays white
+       and larger), it carries a snapshot date, it says "every address" out
+       loud, and app.js never touches it when a query runs. A visitor who
+       mistook this number for their own balance would be reading a lie. -->
+  <div class="stat" id="stat">
+    <p class="stat__label" data-i18n="stat.label">Unclaimed Uniswap V3 fees, Ethereum mainnet</p>
+    <p class="stat__value mono" data-i18n="stat.value">$38,384,084</p>
+    <p class="stat__scope" data-i18n="stat.scope">Every address combined — this is a network-wide measurement, not your balance. Your own lookup is below.</p>
+    <p class="stat__note"><span data-i18n="stat.note">At least — the floor provable from pool balances alone (90 major-token pools, 2026-09-28). A full pass over all 71,818 pools puts the total near $53M.</span> <a href="#method" data-scroll="method" data-i18n="nav.method">Method</a></p>
+  </div>
+
+  <form class="checkrow" id="checkform" autocomplete="off" novalidate>
+    <label class="sr-only" for="addr" data-i18n="addrLabel">Ethereum address</label>
+    <input id="addr" name="addr" class="checkrow__input mono" type="text" spellcheck="false"
+           autocapitalize="off" autocorrect="off" placeholder="0x... or ENS"
+           data-i18n-attr="placeholder:placeholder" aria-describedby="trustline">
+    <button class="btn" id="check" type="submit" data-i18n="check">Check</button>
+  </form>
+
+  <p class="fine" id="trustline" data-i18n="trust">Read-only. No wallet connection, no signatures. Ethereum mainnet.</p>
+  <p class="fine" data-i18n="privacy">We don't log or store the addresses you check.</p>
+
+  <div class="state state--loading" id="state-loading" role="status" aria-live="polite">
+    <p class="state__line" id="loading-line" data-i18n="checking">Reading your positions from the chain…</p>
+    <div class="meter" id="meter" aria-hidden="true"><span class="meter__bar"></span></div>
+  </div>
+
+  <div class="state state--error" id="state-error" role="alert">
+    <p class="state__head" data-i18n="rpcError">Couldn't reach the network. Try again.</p>
+    <p class="state__body" data-i18n="rpcErrorHint">Your browser talks to public Ethereum RPC endpoints directly. They rate-limit, and they fail. Nothing was sent to a server of ours, because there isn't one.</p>
+    <button class="btn btn--ghost" id="retry" type="button" data-i18n="retry">Try again</button>
+  </div>
+
+  <div class="state state--empty" id="state-empty">
+    <p class="state__head" data-i18n="empty">No V3 positions with uncollected fees for this address. If you never provided liquidity on Uniswap V3, this is expected.</p>
+    <p class="state__body" data-i18n="emptyHint">This covers Uniswap V3 on Ethereum mainnet, and only positions whose NFT you still hold. Other chains, v2 LP tokens and positions held inside smart contracts are not included.</p>
+  </div>
+
+  <section class="result" id="result" aria-live="polite"></section>
+
+  <hr class="rule">
+
+  <section class="sec" id="how">
+    <h2 class="h2" data-i18n="how.title">How to collect</h2>
+    <ol class="steps">
+      <li data-i18n="how.s1">Enter a public address above. That is all the tool ever asks for.</li>
+      <li data-i18n="how.s2">Open the position on Uniswap's own interface with the link beside it.</li>
+      <li data-i18n="how.s3">Press Collect there and sign with your own wallet. The fees go straight to that wallet.</li>
+    </ol>
+    <p class="note" data-i18n="how.note1">Collecting always goes through Uniswap's official page and pays 100% to your own wallet. We never take a cut.</p>
+    <p class="note" data-i18n="how.note2">One collect takes everything. Uniswap settles the fees still accruing inside the pool at the same moment, so a single transaction is enough — you do not need to decrease liquidity first.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section class="sec" id="safety">
+    <h2 class="h2" data-i18n="safety.title">Safety</h2>
+    <p data-i18n="safety.lead">Money that nobody has claimed attracts people who want to take it. Three rules cover almost every attack:</p>
+    <ol class="steps">
+      <li data-i18n="safety.r1">Never share a seed phrase or private key. No tool, and no member of any team, will ever need it.</li>
+      <li data-i18n="safety.r2">Never approve a contract to "unlock" or "release" fees. Collecting is an ordinary transaction you sign yourself, on Uniswap.</li>
+      <li data-i18n="safety.r3">No one will message you first with a claim link. If someone DMs you about this page, it is not us.</li>
+    </ol>
+    <p class="note" data-i18n="safety.dm">We will never DM you first, never ask for a seed phrase, and never send claim links.</p>
+    <p class="note" data-i18n="safety.clone">Anyone can copy a website. A clone of this page exists only to get a signature out of you. This tool never asks you to connect a wallet, so if any page built to look like it does, close the tab. Check the address bar first.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section class="sec" id="tip">
+    <h2 class="h2" data-i18n="tipsec.title">Tip (optional)</h2>
+    <p data-i18n="tipsec.body">There is no account, no paywall and no cut. If this page found you money and you feel like sending something back, the address at the very top of this page is the only one the tool controls.</p>
+    <p class="note" data-i18n="tipsec.body2">Sending a tip is never required to see or collect your own fees. Nothing about the result changes if you skip it.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section class="sec" id="method">
+    <h2 class="h2" data-i18n="method.title">Method</h2>
+    <!-- Filled from i18n by app.js: this section is long, largely multi-paragraph
+         and carries a formula, so it is rendered rather than keyed line by line. -->
+    <div id="methodbody"></div>
+  </section>
+
+  <hr class="rule">
+
+  <nav class="footnav" aria-label="Sections">
+    <a href="#how" data-scroll="how" data-i18n="foot.how">How to collect</a>
+    <span class="nav__sep" aria-hidden="true">·</span>
+    <a href="#safety" data-scroll="safety" data-i18n="foot.safety">Safety</a>
+    <span class="nav__sep" aria-hidden="true">·</span>
+    <a href="#tip" data-scroll="tip" data-i18n="foot.tip">Tip (optional)</a>
+    <span class="nav__sep" aria-hidden="true">·</span>
+    <a href="#method" data-scroll="method" data-i18n="foot.method">Method</a>
+  </nav>
+
+  <footer class="foot">
+    <p class="mono foot__meta"><span data-i18n="foot.chain">Ethereum mainnet · Uniswap V3</span> · <span data-i18n="foot.asof">data as of</span> <span class="mono" id="datatime-foot">—</span></p>
+    <p data-i18n="foot.independent">Independent onchain research.</p>
+    <p class="mono" data-i18n="foot.source">No cookies. No analytics. No wallet connection. No server of ours.</p>
+  </footer>
+
+</main>
+
+<input type="text" id="copybuf" class="copybuf" aria-hidden="true" tabindex="-1" readonly>
+</body>
+</html>

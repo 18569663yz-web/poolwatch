@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One URL, deliberately. The Method page is not a separate document — it is a
+     client-side view inside the same HTML (v3fees/site/index.html), so listing
+     it would be inventing a URL that 404s. The root / is a meta-refresh stub to
+     this URL and is not listed for the same reason.
+     No <lastmod>: nothing here knows a trustworthy "last modified" date, and a
+     wrong one is worse than none. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://poolwatch.dess.lol/site/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
