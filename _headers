@@ -7,7 +7,7 @@
 #
 # 依据：developers.cloudflare.com/pages/configuration/headers/ ——「Headers defined in
 # the `_headers` file override what Cloudflare ordinarily sends.」另有两条硬限制：
-# 最多 100 条规则、每行不超过 2000 字符（本文件 14 条规则，最长一行 314 字符）。
+# 最多 100 条规则、每行不超过 2000 字符（本文件 15 条规则，最长一行 314 字符）。
 #
 # 这里有两条独立的价值：
 #   1. 缓存规则 —— HTML 不缓存，否则用户会看到旧版本（Edge 对 ES module 的启发式缓存
@@ -32,6 +32,12 @@
   Cache-Control: no-cache, must-revalidate
 
 /index.html
+  Cache-Control: no-cache, must-revalidate
+
+# 自定义 404 页。没有它的时候 Cloudflare Pages 会把任何未匹配路径用 **200** 返回
+# 根目录的 index.html（实测 /_headers、/nonexistent-xyz 均如此），爬虫会把垃圾路径
+# 当有效页收录。见 v3fees/404.html 顶部注释。
+/404.html
   Cache-Control: no-cache, must-revalidate
 
 /site

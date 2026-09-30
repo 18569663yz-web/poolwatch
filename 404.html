@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 与 v3fees/index.html 的 meta 逐字一致（同一份策略，见 v3fees/_headers:15）。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ethereum-rpc.publicnode.com https://virginia.rpc.blxrbdn.com https://eth.rpc.blxrbdn.com https://coins.llama.fi; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<title>404 — no such page</title>
+<!-- 为什么需要这个文件：Cloudflare Pages 在没有 404.html 时，会把**任何**没匹配到的
+     路径用 200 返回根目录的 index.html（实测 /_headers、/nonexistent-xyz 都是 200 +
+     2864 字节的跳转桩）。那意味着爬虫会把垃圾路径当成有效页面收录。放一个 404.html
+     之后，Pages 会用 404 状态码返回它。 -->
+<link rel="stylesheet" href="landing.css">
+</head>
+<body>
+<h1>404 — no such page</h1>
+<p>That path does not exist here. 这个路径不存在。</p>
+<p><a href="/site/">Go to the lookup form →</a></p>
+</body>
+</html>
