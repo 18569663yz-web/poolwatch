@@ -41,10 +41,13 @@ export const STRINGS = {
     'stat.note': 'At least — the floor provable from pool balances alone (90 major-token pools, 2026-09-28). A full pass over all 71,818 pools puts the total near $53M.',
     // Scope, stated next to the number rather than buried in Method. The point
     // is deliberately double-edged: mainnet is where the money is, and that is
-    // exactly why it is the one chain worth doing first. Counts are rounded on
-    // purpose — they move every block, and a moving exact number on a page
-    // built around one dated snapshot would read as a live figure.
-    'stat.chains': 'Ethereum mainnet only, for now. It is also where the money is: 1.23M position NFTs holding roughly $50M uncollected, against about $6M across Base, BNB, Arbitrum, Optimism and Polygon combined — even though those five chains hold 15.9M positions between them. More chains are coming.',
+    // exactly why it is the one chain worth doing first. Note the wording: this
+    // line must reuse the headline figure rather than introduce another
+    // estimate, or the block would carry three different totals ($38.4M floor,
+    // $53M full pass, and a new one) and read as self-contradicting. Counts are
+    // rounded on purpose — they move every block, and an exact moving number on
+    // a page built around one dated snapshot reads as a live figure.
+    'stat.chains': 'Ethereum mainnet only, for now — and that is where the money is. Mainnet holds 1.23M positions, and all $38,384,084 above is on this one chain. Base, BNB, Arbitrum, Optimism and Polygon hold 15.9M positions between them yet add only about $6M. More chains are coming.',
 
     'addrLabel': 'Ethereum address',
     'placeholder': '0x... or ENS',
@@ -276,7 +279,7 @@ export const STRINGS = {
     'stat.value': '$38,384,084',
     'stat.scope': '所有地址合计 —— 这是一个全网测量值，不是你的余额。你自己的查询在下方。',
     'stat.note': '至少 —— 这是仅凭池内余额就能证明的下限（90 个主流代币池，2026-09-28）。对全部 71,818 个池子做全量统计约为 5300 万美元。',
-    'stat.chains': '目前只接入了以太坊主网。而钱也主要在它这里：主网 123 万个仓位，约有 5,000 万美元未领取；Base、BNB、Arbitrum、Optimism、Polygon 五条链加起来只有约 600 万美元 —— 尽管这五条链上的仓位合计有 1,590 万个。更多链后续会加上。',
+    'stat.chains': '目前只接入了以太坊主网 —— 而钱也确实主要在这里。主网有 123 万个仓位，上面那 $38,384,084 全部来自这一条链。Base、BNB、Arbitrum、Optimism、Polygon 五条链合计有 1,590 万个仓位，加起来却只多出约 600 万美元。更多链后续会加上。',
 
     'addrLabel': '以太坊地址',
     'placeholder': '0x... 或 ENS 域名',
