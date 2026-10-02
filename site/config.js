@@ -16,6 +16,12 @@ export const DONATION_ADDRESS = '0x5006d8d4e3e96c445882327921151190f7b34a7c';
 // produced the bytes you deployed.
 export const SOURCE_URL = 'https://github.com/18569663yz-web/poolwatch';
 
+// The owner's main site. This tool is one subdomain of it, so the top
+// navigation leads back to the front door. Empty hides the link entirely —
+// the same rule as SOURCE_URL: a nav item that goes nowhere is worse than no
+// nav item. Only a bare https URL counts as live.
+export const HOME_URL = 'https://dess.lol/';
+
 // Uniswap's own interface. The tool never collects anything itself: it links
 // here and the user signs in their own wallet.
 export const UNISWAP_POSITIONS = 'https://app.uniswap.org/positions/v3/ethereum';

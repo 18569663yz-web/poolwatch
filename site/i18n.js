@@ -24,6 +24,7 @@ export const STRINGS = {
     'tip.copied': 'copied',
     'tip.never': 'This tool will never DM you, never ask for a seed phrase, and never send you a claim link.',
 
+    'nav.home': 'Home',
     'nav.fees': 'Fees',
     'nav.method': 'Method',
     'nav.github': 'GitHub',
@@ -267,6 +268,7 @@ export const STRINGS = {
     'tip.copied': '已复制',
     'tip.never': '本工具永远不会私信你、不会要助记词、不会给你发领取链接。',
 
+    'nav.home': '首页',
     'nav.fees': '查询',
     'nav.method': '方法',
     'nav.github': 'GitHub',

@@ -9,7 +9,7 @@
 // adapter still renders the whole page (and says so) instead of a blank screen.
 
 import { t, detectLang, rememberLang, htmlLang } from './i18n.js';
-import { DONATION_ADDRESS, SOURCE_URL, UNISWAP_POSITIONS, ETHERSCAN } from './config.js';
+import { DONATION_ADDRESS, SOURCE_URL, HOME_URL, UNISWAP_POSITIONS, ETHERSCAN } from './config.js';
 import { renderRich } from './rich.js';
 
 const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
@@ -36,6 +36,7 @@ const els = {
   tipAddr: document.getElementById('tipaddr'),
   tipNote: document.getElementById('tipnote'),
   navSrc: document.querySelectorAll('[data-navsrc]'),
+  navHome: document.querySelectorAll('[data-navhome]'),
   datatimeFoot: document.getElementById('datatime-foot'),
   copybuf: document.getElementById('copybuf')
 };
@@ -730,6 +731,20 @@ function renderSourceLink() {
   });
 }
 
+/**
+ * The same rule for the way back: this tool is one subdomain of the owner's
+ * main site, so the front door belongs in the navigation — but only when
+ * there is a door to point at.
+ */
+function renderHomeLink() {
+  const url = (HOME_URL || '').trim();
+  const live = /^https:\/\/\S+$/.test(url);
+  els.navHome.forEach((el) => {
+    if (live && el.tagName === 'A') el.href = url;
+    el.hidden = !live;
+  });
+}
+
 // ------------------------------------------------------------------ copy
 
 async function copyText(text) {
@@ -860,6 +875,7 @@ function driveValue() {
 async function init() {
   mockBanner();
   renderSourceLink();
+  renderHomeLink();
   wire();
   applyLang(detectLang());
 
