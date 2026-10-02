@@ -435,23 +435,36 @@ export async function getTokenPrices(addresses) {
   let i = 0;
   while (padded.size < missing.length + 50 && i < PAD_TOKENS.length * 3) padded.add(PAD_TOKENS[i++ % PAD_TOKENS.length]);
 
-  let coins = {};
-  try {
-    const url = 'https://coins.llama.fi/prices/current/' + [...padded].map((a) => 'ethereum:' + a).join(',');
+  // DefiLlama 是 GET + 逗号批量，代币一多 URL 就被撑爆：实测 307 个代币 → URL **16,001 字符
+  // → 414 URI Too Long**，整批报价全部落空。更糟的是旧写法会把 null 写进缓存，于是同一个会话里
+  // 之后每个地址（哪怕只有 3 个仓位）都跟着报「无价」—— 浏览器里这份毒还会进 localStorage，
+  // 存 5 分钟。所以必须切开发请求：70 个代币 ≈ 3.5 KB URL，留足余量。
+  const PRICE_CHUNK = 70;
+  const list = [...padded];
+  const coins = {};
+  const answered = new Set();
+  for (let k = 0; k < list.length; k += PRICE_CHUNK) {
+    const part = list.slice(k, k + PRICE_CHUNK);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), PRICE_TIMEOUT_MS);
     try {
+      const url = 'https://coins.llama.fi/prices/current/' + part.map((a) => 'ethereum:' + a).join(',');
       const r = await fetch(url, { signal: ctrl.signal });
-      if (r.ok) coins = (await r.json()).coins || {};
-    } finally {
+      if (r.ok) {
+        Object.assign(coins, (await r.json()).coins || {});
+        for (const a of part) answered.add(a);
+      }
+    } catch { /* 单批失败不拖垮其他批 */ } finally {
       clearTimeout(timer);
     }
-  } catch { /* 报价失败/超时 → 全部按「无价」处理，绝不抛，也绝不拖住整次查询 */ }
+  }
 
   for (const a of missing) {
     const hit = coins['ethereum:' + a];
     const usd = hit && typeof hit.price === 'number' ? hit.price : null;
-    cacheSet('v3fees:price:' + a, { usd });
+    // 只有「这一批真的问到了」才缓存 null：干净地答「没有这个币的报价」可以缓存，
+    // 而 414/超时造成的整批缺席绝不能缓存，否则一次失败毒掉 TTL 内所有共用这些代币的地址。
+    if (answered.has(a)) cacheSet('v3fees:price:' + a, { usd });
     out.set(a, usd);
   }
   return out;
